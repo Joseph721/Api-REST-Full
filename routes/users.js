@@ -1,4 +1,5 @@
 const { response } = require('express');
+const bcrypt = require('bcrypt');
 const express = require('express');
 const Joi = require('joi');
 const Usuario = require('../models/user_model');
@@ -35,25 +36,42 @@ ruta.get('/', (req, res) => {
 ruta.post('/', (req, res) => {
     let body = req.body;
 
-    const { error, value } = schema.validate({ nombre: body.nombre, email: body.email });
-    if (!error) {
+    /* Puede haber un error y user es para traer al usuario de la colección de MongoDB */
+    Usuario.findOne({ email: body.email }, (err, user) => {
+        if (err) {
+            return res.status(400).json({ error: 'Server Error' });
+        }
+        if (user) {
+            /* Si usuario existe */
+            return res.status(400).json({
+                msj: 'El email ya existe en la base de datos'
+            });
 
-        let resultado = crearUser(body);
+        } else {
 
-        resultado.then(user => {
-            res.json({
-                valor: user
-            })
-        }).catch(err => {
-            res.status(400).json({
-                error: err
-            })
-        });
-    } else {
-        res.status(400).json({
-            error: error
-        })
-    }
+            const { error, value } = schema.validate({ nombre: body.nombre, email: body.email });
+
+            if (!error) {
+
+                let resultado = crearUser(body);
+
+                resultado.then(user => {
+                    res.json({
+                        nombre: user.nombre,
+                        email: user.email
+                    })
+                }).catch(err => {
+                    res.status(400).json({
+                        error: err
+                    })
+                });
+            } else {
+                res.status(400).json({
+                    error: error
+                })
+            }
+        }
+    });
 
 });
 
@@ -65,7 +83,8 @@ ruta.put('/:email', (req, res) => {
         let resultado = actualizarUser(req.params.email, req.body);
         resultado.then(valor => {
             res.json({
-                valor: valor
+                nombre: valor.nombre,
+                email: valor.email
             })
         }).catch(err => {
             res.status(400).json({
@@ -85,11 +104,12 @@ ruta.delete('/:email', (req, res) => {
     let resultado = desactivarUser(req.params.email);
     resultado.then(valor => {
         res.json({
-            usuario: valor
+            nombre: valor.nombre,
+            email: valor.email
         })
     }).catch(err => {
         res.status(400).json({
-            error: err
+            err
         })
     });
 });
@@ -100,13 +120,14 @@ async function crearUser(body) {
     let usuario = new Usuario({
         email: body.email,
         nombre: body.nombre,
-        password: body.password
+        password: bcrypt.hashSync(body.password, 10)
     });
     return await usuario.save();
 }
 
 async function listarUsuariosActivos() {
-    let usuarios = await Usuario.find({ "estado": true });
+    let usuarios = await Usuario.find({ "estado": true })
+        .select({ nombre: 1, email: 1 });
     return usuarios;
 }
 
