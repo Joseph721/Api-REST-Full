@@ -1,0 +1,11 @@
+{
+    "nombre": "API Rest Express - Usuarios y Cursos",
+    "config": {
+
+    },
+    "configToken": {
+        "SEED" : "Pizza",
+        "expiration ": "24h"
+    }
+
+}

@@ -1,0 +1,11 @@
+{
+    "nombre": "API Rest Express - Usuarios y Cursos",
+    "configdb": {
+        "HOST" : "mongodb://localhost/demo"
+    },
+    "configToken": {
+        "SEED" : "Pizza",
+        "expiration": "24h"
+    }
+
+}
