@@ -120,7 +120,10 @@ async function crearUser(body) {
     let usuario = new Usuario({
         email: body.email,
         nombre: body.nombre,
+
+        /* Una de las formas de encriptar las contraseñas. */
         password: bcrypt.hashSync(body.password, 10)
+
     });
     return await usuario.save();
 }

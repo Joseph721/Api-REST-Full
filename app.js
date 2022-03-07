@@ -1,6 +1,6 @@
 const usuarios = require('./routes/users');
 const cursos = require('./routes/courses');
-
+const auth = require('./routes/auth');
 const express = require('express');
 const mongoose = require('mongoose');
 
@@ -17,6 +17,9 @@ app.use(express.urlencoded({extended: true}));
 
 app.use('/api/users',usuarios);
 app.use('/api/courses', cursos);
+
+/* Ruta que nos servirá para la autenticación de los usuarios. */
+app.use('/api/auth', auth);
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
